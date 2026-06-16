@@ -1,0 +1,19 @@
+{
+  "name": "cypress-api-tests",
+  "version": "1.0.0",
+  "description": "API and UI test automation suite using Cypress + TypeScript. Covers REST API testing, network interception, and data-driven tests.",
+  "scripts": {
+    "test": "cypress run",
+    "test:headed": "cypress run --headed",
+    "test:open": "cypress open",
+    "test:api-get": "cypress run --spec 'cypress/e2e/api-get.cy.ts'",
+    "test:api-crud": "cypress run --spec 'cypress/e2e/api-crud.cy.ts'",
+    "test:intercept": "cypress run --spec 'cypress/e2e/network-interception.cy.ts'",
+    "test:data-driven": "cypress run --spec 'cypress/e2e/data-driven.cy.ts'"
+  },
+  "devDependencies": {
+    "cypress": "^13.0.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

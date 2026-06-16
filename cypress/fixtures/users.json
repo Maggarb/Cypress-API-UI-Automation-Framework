@@ -1,0 +1,21 @@
+{
+  "createUser": {
+    "name": "Magdalena",
+    "job": "QA Engineer"
+  },
+  "updateUser": {
+    "name": "Magdalena Garbowska",
+    "job": "Senior QA Engineer"
+  },
+  "validUsers": [
+    { "email": "eve.holt@reqres.in", "password": "cityslicka" },
+    { "email": "peter.parker@reqres.in", "password": "klanchmaster3" }
+  ],
+  "invalidLogin": {
+    "email": "invalid@test.com",
+    "password": "wrongpassword"
+  },
+  "missingPassword": {
+    "email": "peter@klanchman.com"
+  }
+}

@@ -1,0 +1,49 @@
+# ============================================================
+# GITHUB ACTIONS — CI PIPELINE FOR CYPRESS
+# ============================================================
+
+name: Cypress Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  cypress-run:
+    name: Run Cypress Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Use the official Cypress GitHub Action
+      # It handles install + browser setup automatically
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          # Run in headless mode (no UI needed in CI)
+          headed: false
+
+      # Upload screenshots if any tests fail
+      - name: Upload failure screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/
+          retention-days: 7
+
+      # Upload videos if enabled
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos/
+          retention-days: 7
+          if-no-files-found: ignore
