@@ -1,23 +1,23 @@
-# Cypress API & UI Test Suite
+#  Cypress API & UI Test Suite
 
 ![Cypress Tests](https://github.com/Maggarb/Cypress-API-UI-Automation-Framework/actions/workflows/cypress.yml/badge.svg)
 
-API and network interception test suite built with **Cypress** and **TypeScript**, testing the [reqres.in](https://reqres.in) REST API. Demonstrates API testing, response validation, network stubbing, and data-driven testing.
+API and network interception test suite built with **Cypress** and **TypeScript**, testing [JSONPlaceholder](https://jsonplaceholder.typicode.com) — a free public REST API. Demonstrates API testing, response validation, network stubbing, and data-driven testing.
 
 ---
 
 ## 🗂️ Project Structure
 
 ```
-cypress-api-tests/
+Cypress-API-UI-Automation-Framework/
 ├── cypress/
 │   ├── e2e/
-│   │   ├── api-get.cy.ts              # GET request tests (8 cases)
-│   │   ├── api-crud.cy.ts             # POST/PUT/PATCH/DELETE tests (9 cases)
-│   │   ├── network-interception.cy.ts # cy.intercept() stub & spy (6 cases)
-│   │   └── data-driven.cy.ts          # Parameterised tests (6 test groups)
+│   │   ├── api-get.cy.ts              # GET request tests
+│   │   ├── api-crud.cy.ts             # POST/PUT/PATCH/DELETE tests
+│   │   ├── network-interception.cy.ts # cy.intercept() stub & spy
+│   │   └── data-driven.cy.ts          # Parameterised tests
 │   ├── fixtures/
-│   │   └── users.json                 # Centralised test data
+│   │   └── posts.json                 # Centralised test data
 │   └── support/
 │       ├── commands.ts                # Custom Cypress commands
 │       └── e2e.ts                     # Global setup
@@ -30,14 +30,14 @@ cypress-api-tests/
 
 ## ✅ Test Coverage
 
-| File | Test Cases | Techniques |
-|------|-----------|-----------|
-| `api-get.cy.ts` | TC-001 to TC-008 | Schema validation, pagination, response time |
-| `api-crud.cy.ts` | TC-009 to TC-017 | Full CRUD, auth, error handling |
-| `network-interception.cy.ts` | TC-018 to TC-023 | Stubbing, spying, delay simulation |
-| `data-driven.cy.ts` | TC-024 to TC-029 | Parameterised loops, fixture-driven |
+| File | Focus | Techniques |
+|------|-------|-----------|
+| `api-get.cy.ts` | GET `/posts`, `/comments`, `/users` | Schema validation, filtering, response time |
+| `api-crud.cy.ts` | POST/PUT/PATCH/DELETE on `/posts` | Full CRUD, status codes, payload validation |
+| `network-interception.cy.ts` | Stubbing & spying | Empty states, 500 errors, slow network simulation |
+| `data-driven.cy.ts` | Parameterised scenarios | Loops over multiple IDs and inputs |
 
-**Total: 30+ test scenarios** covering GET, POST, PUT, PATCH, DELETE, auth, and network edge cases.
+Covers GET, POST, PUT, PATCH, DELETE, and network edge cases across the `/posts`, `/comments`, and `/users` endpoints.
 
 ---
 
@@ -50,8 +50,8 @@ cypress-api-tests/
 ### Installation
 
 ```bash
-git clone https://github.com/Maggarb/cypress-api-tests.git
-cd cypress-api-tests
+git clone https://github.com/Maggarb/Cypress-API-UI-Automation-Framework.git
+cd Cypress-API-UI-Automation-Framework
 npm install
 ```
 
@@ -85,10 +85,10 @@ Stubs API responses to simulate edge cases (empty states, 500 errors, slow netwo
 Parameterised test loops that run the same test logic across multiple inputs. Reduces duplication and makes adding new test cases trivial.
 
 **Custom Commands**
-Reusable commands (`cy.apiLogin()`, `cy.createUser()`) that abstract common actions — the Cypress equivalent of Page Object Model.
+Reusable commands that abstract common actions — the Cypress equivalent of Page Object Model.
 
 **Fixtures**
-Test data stored in `cypress/fixtures/users.json` and loaded with `cy.fixture()` — separates data from test logic for cleaner, more maintainable tests.
+Test data stored in `cypress/fixtures/` and loaded with `cy.fixture()` — separates data from test logic for cleaner, more maintainable tests.
 
 ---
 
@@ -99,7 +99,8 @@ Test data stored in `cypress/fixtures/users.json` and loaded with `cy.fixture()`
 | [Cypress](https://cypress.io) | Test framework |
 | TypeScript | Type-safe test code |
 | GitHub Actions | CI/CD — runs on every push |
-| reqres.in | Public REST API under test |
+| JSONPlaceholder | Public REST API under test |
 
 ---
+
 
