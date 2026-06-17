@@ -1,6 +1,6 @@
 # Cypress API & UI Test Suite
 
-![Cypress Tests](https://github.com/Maggarb/cypress-api-tests/actions/workflows/cypress.yml/badge.svg)
+![Cypress Tests](https://github.com/Maggarb/Cypress-API-UI-Automation-Framework/actions/workflows/cypress.yml/badge.svg)
 
 API and network interception test suite built with **Cypress** and **TypeScript**, testing the [reqres.in](https://reqres.in) REST API. Demonstrates API testing, response validation, network stubbing, and data-driven testing.
 
