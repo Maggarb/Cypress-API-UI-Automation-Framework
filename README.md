@@ -1,4 +1,4 @@
-# 🌲 Cypress API & UI Test Suite
+# Cypress API & UI Test Suite
 
 ![Cypress Tests](https://github.com/Maggarb/cypress-api-tests/actions/workflows/cypress.yml/badge.svg)
 
@@ -41,7 +41,7 @@ cypress-api-tests/
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Node.js 18+
@@ -73,7 +73,7 @@ npm run test:data-driven
 
 ---
 
-## 🔧 Key Techniques Demonstrated
+##  Key Techniques Demonstrated
 
 **API Testing with `cy.request()`**
 Direct HTTP requests to REST endpoints — faster and more stable than UI-driven tests. Validates status codes, response schemas, and headers.
@@ -92,7 +92,7 @@ Test data stored in `cypress/fixtures/users.json` and loaded with `cy.fixture()`
 
 ---
 
-## 🏗️ Tech Stack
+##  Tech Stack
 
 | Tool | Purpose |
 |------|---------|
@@ -103,4 +103,3 @@ Test data stored in `cypress/fixtures/users.json` and loaded with `cy.fixture()`
 
 ---
 
-*Part of my QA automation portfolio — see also [Playwright E2E Tests](https://github.com/Maggarb/playwright-saucedemo) and [Python API Framework](https://github.com/Maggarb/pytest-api-framework)*

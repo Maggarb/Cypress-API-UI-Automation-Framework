@@ -7,7 +7,7 @@ export default defineConfig({
 
   e2e: {
     // Base URL for the app under test
-    baseUrl: 'https://reqres.in',
+    baseUrl: 'https://jsonplaceholder.typicode.com',
 
     // Where spec files live
     specPattern: 'cypress/e2e/**/*.cy.ts',

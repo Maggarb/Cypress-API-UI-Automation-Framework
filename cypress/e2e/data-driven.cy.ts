@@ -1,14 +1,5 @@
 // ============================================================
-// DATA-DRIVEN TESTS
-//
-// Instead of writing one test per input, we loop over an array
-// of test cases. This is called "data-driven testing" and is
-// a key skill in QA automation.
-//
-// Benefits:
-// - One test function covers many scenarios
-// - Easy to add new cases by just adding data
-// - Keeps tests DRY (Don't Repeat Yourself)
+// DATA-DRIVEN TESTS (FIXED FOR JSONPLACEHOLDER)
 // ============================================================
 
 describe('Data-Driven Tests', () => {
@@ -18,11 +9,14 @@ describe('Data-Driven Tests', () => {
   const pages = [1, 2];
 
   pages.forEach((page) => {
-    it(`TC-024-page${page}: GET /api/users?page=${page} returns valid response`, () => {
-      cy.request(`GET`, `/api/users?page=${page}`).then((response) => {
+    it(`TC-024-page${page}: GET /users?page=${page} returns valid response`, () => {
+      cy.request({
+        method: 'GET',
+        url: `/users?_page=${page}&_limit=5`,
+      }).then((response) => {
         expect(response.status).to.equal(200);
-        expect(response.body.page).to.equal(page);
-        expect(response.body.data).to.be.an('array').and.have.length.greaterThan(0);
+        expect(response.body).to.be.an('array');
+        expect(response.body.length).to.be.greaterThan(0);
       });
     });
   });
@@ -32,76 +26,77 @@ describe('Data-Driven Tests', () => {
   const validUserIds = [1, 2, 3, 4, 5, 6];
 
   validUserIds.forEach((id) => {
-    it(`TC-025-id${id}: GET /api/users/${id} returns correct user`, () => {
-      cy.request('GET', `/api/users/${id}`).then((response) => {
+    it(`TC-025-id${id}: GET /users/${id} returns correct user`, () => {
+      cy.request('GET', `/users/${id}`).then((response) => {
         expect(response.status).to.equal(200);
-        expect(response.body.data.id).to.equal(id);
-        expect(response.body.data.email).to.be.a('string').and.include('@');
+        expect(response.body.id).to.equal(id);
+        expect(response.body.email).to.be.a('string').and.include('@');
       });
     });
   });
 
-  // ── Invalid user IDs ──────────────────────────────────────
+// ── Invalid user IDs ──────────────────────────────────────
+// JSONPlaceholder returns 404 for non-existent users
 
-  const invalidUserIds = [0, 9999, 99999];
+const invalidUserIds = [9999, 99999];
 
-  invalidUserIds.forEach((id) => {
-    it(`TC-026-id${id}: GET /api/users/${id} returns 404`, () => {
-      cy.request({
-        method: 'GET',
-        url: `/api/users/${id}`,
-        failOnStatusCode: false,
-      }).then((response) => {
-        expect(response.status).to.equal(404);
-      });
+invalidUserIds.forEach((id) => {
+  it(`TC-026-id${id}: GET /users/${id} returns 404`, () => {
+    cy.request({
+      method: 'GET',
+      url: `/users/${id}`,
+      failOnStatusCode: false,
+    }).then((response) => {
+      expect(response.status).to.equal(404);
+      expect(response.body).to.deep.equal({});
     });
   });
+});
+  
 
-  // ── CRUD operations with fixture data ─────────────────────
+  // ── CREATE multiple posts ─────────────────────────────────
 
-  it('TC-027: Create multiple users in sequence and verify unique IDs', () => {
-    const users = [
-      { name: 'Alice', job: 'QA Lead' },
-      { name: 'Bob', job: 'Developer' },
-      { name: 'Charlie', job: 'DevOps' },
+  it('TC-027: Create multiple posts and verify responses', () => {
+    const posts = [
+      { title: 'Alice', body: 'QA Lead', userId: 1 },
+      { title: 'Bob', body: 'Developer', userId: 1 },
+      { title: 'Charlie', body: 'DevOps', userId: 1 },
     ];
 
-    const createdIds: string[] = [];
+    const ids: number[] = [];
 
-    // Chain requests sequentially
-    users.forEach((user) => {
+    posts.forEach((post) => {
       cy.request({
         method: 'POST',
-        url: '/api/users',
-        body: user,
+        url: '/posts',
+        body: post,
       }).then((response) => {
         expect(response.status).to.equal(201);
-        expect(response.body.name).to.equal(user.name);
+        expect(response.body.title).to.equal(post.title);
 
-        // IDs should be unique
-        expect(createdIds).not.to.include(response.body.id);
-        createdIds.push(response.body.id);
+        // JSONPlaceholder always returns id = 101 (mock API limitation)
+        expect(response.body).to.have.property('id');
+
+        ids.push(response.body.id);
       });
     });
   });
 
-  // ── Login with fixture data ────────────────────────────────
+  // ── POST validation ───────────────────────────────────────
 
-  it('TC-028: Login with valid credentials from fixture', () => {
-    cy.fixture('users').then((data) => {
-      // Test first valid user from fixture
-      const user = data.validUsers[0];
-      cy.request({
-        method: 'POST',
-        url: '/api/login',
-        body: { email: user.email, password: user.password },
-        failOnStatusCode: false,
-      }).then((response) => {
-        // Note: reqres.in only accepts specific pre-seeded users
-        // This tests that our fixture data is correctly structured
-        expect(response.status).to.be.oneOf([200, 400]);
-        expect(response.body).to.be.an('object');
-      });
+  it('TC-028: POST /posts returns created object', () => {
+    cy.request({
+      method: 'POST',
+      url: '/posts',
+      body: {
+        title: 'test user',
+        body: 'test body',
+        userId: 1,
+      },
+    }).then((response) => {
+      expect(response.status).to.equal(201);
+      expect(response.body).to.have.property('id');
+      expect(response.body.title).to.equal('test user');
     });
   });
 
@@ -110,14 +105,18 @@ describe('Data-Driven Tests', () => {
   const updateMethods: Array<'PUT' | 'PATCH'> = ['PUT', 'PATCH'];
 
   updateMethods.forEach((method) => {
-    it(`TC-029-${method}: ${method} /api/users/2 updates user successfully`, () => {
+    it(`TC-029-${method}: ${method} /posts/1 updates post successfully`, () => {
       cy.request({
         method,
-        url: '/api/users/2',
-        body: { name: 'Updated Name', job: 'Updated Job' },
+        url: '/posts/1',
+        body: {
+          title: 'Updated Title',
+          body: 'Updated Body',
+          userId: 1,
+        },
       }).then((response) => {
         expect(response.status).to.equal(200);
-        expect(response.body).to.have.property('updatedAt');
+        expect(response.body.title).to.equal('Updated Title');
       });
     });
   });

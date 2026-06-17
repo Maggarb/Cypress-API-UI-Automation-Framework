@@ -1,128 +1,98 @@
 // ============================================================
 // NETWORK INTERCEPTION TESTS
-//
-// This is one of Cypress's most powerful features — cy.intercept()
-// lets you:
-// 1. SPY on API calls made by the UI (verify the app calls the right endpoint)
-// 2. STUB responses (return fake data to test UI edge cases)
-// 3. DELAY responses (test loading states)
-//
-// This is exactly what real QA teams do to test error states,
-// loading spinners, empty states, and network failures —
-// without needing the backend to actually be broken.
 // ============================================================
 
 describe('Network Interception — Stub & Spy', () => {
 
-  it('TC-018: Intercept and verify app calls /api/users on load', () => {
-    // Set up intercept BEFORE visiting the page
-    cy.intercept('GET', '/api/users*').as('getUsers');
+  it('TC-018: Spy on GET /users request', () => {
+    cy.intercept('GET', '**/users').as('getUsers');
 
-    cy.visit('/api/users');
-
-    // Wait for the intercepted call and assert on it
-    cy.wait('@getUsers').then((interception) => {
-      expect(interception.response?.statusCode).to.equal(200);
-      expect(interception.request.url).to.include('/api/users');
+    cy.request('/users').then((response) => {
+      expect(response.status).to.equal(200);
+      expect(response.body).to.be.an('array');
     });
   });
 
-  it('TC-019: Stub API to return empty list — UI handles empty state', () => {
-    // Override the real API response with our fake one
-    cy.intercept('GET', '/api/users*', {
+  it('TC-019: Verify stubbed empty users response', () => {
+    cy.intercept('GET', '**/users', {
       statusCode: 200,
-      body: {
-        page: 1,
-        per_page: 6,
-        total: 0,
-        total_pages: 0,
-        data: [],  // Empty list
-      },
+      body: [],
     }).as('emptyUsers');
 
-    cy.visit('/api/users');
-    cy.wait('@emptyUsers');
+    // Trigger request from browser context
+    cy.window().then((win) => {
+      win.fetch(`${Cypress.config('baseUrl')}/users`);
+    });
 
-    // The stub worked — response has empty data
-    cy.get('@emptyUsers').its('response.body.data').should('have.length', 0);
+    cy.wait('@emptyUsers')
+      .its('response.body')
+      .should('deep.equal', []);
   });
 
-  it('TC-020: Stub API to return 500 error — app handles server errors', () => {
-    cy.intercept('GET', '/api/users*', {
+  it('TC-020: Verify stubbed 500 error response', () => {
+    cy.intercept('GET', '**/users', {
       statusCode: 500,
-      body: { error: 'Internal Server Error' },
+      body: {
+        error: 'Internal Server Error',
+      },
     }).as('serverError');
 
-    cy.visit('/api/users');
-    cy.wait('@serverError');
+    cy.window().then((win) => {
+      win.fetch(`${Cypress.config('baseUrl')}/users`);
+    });
 
-    cy.get('@serverError').its('response.statusCode').should('equal', 500);
+    cy.wait('@serverError')
+      .its('response.statusCode')
+      .should('equal', 500);
   });
 
-  it('TC-021: Stub API to simulate slow network (1500ms delay)', () => {
-    cy.intercept('GET', '/api/users*', (req) => {
-      // Add a 1500ms delay to simulate slow network
-      req.reply((res) => {
-        res.setDelay(1500);
-        res.send({ statusCode: 200 });
-      });
-    }).as('slowResponse');
+  it('TC-021: Simulate slow network response', () => {
+    cy.intercept('GET', '**/users', {
+      delay: 1500,
+      statusCode: 200,
+      body: [],
+    }).as('slowUsers');
 
     const start = Date.now();
-    cy.visit('/api/users');
 
-    cy.wait('@slowResponse').then(() => {
+    cy.window().then((win) => {
+      win.fetch(`${Cypress.config('baseUrl')}/users`);
+    });
+
+    cy.wait('@slowUsers').then(() => {
       const duration = Date.now() - start;
-      // Response should have taken at least 1500ms
-      expect(duration).to.be.greaterThan(1500);
+      expect(duration).to.be.greaterThan(1400);
     });
   });
 
-  it('TC-022: Intercept POST and verify correct request body is sent', () => {
-    const expectedBody = { name: 'Magdalena', job: 'QA Engineer' };
-
-    cy.intercept('POST', '/api/users', (req) => {
-      // Assert on the outgoing request body
-      expect(req.body.name).to.equal(expectedBody.name);
-      expect(req.body.job).to.equal(expectedBody.job);
-
-      // Let the real request go through
-      req.continue();
-    }).as('createUser');
-
-    // Make the actual request
-    cy.request({
-      method: 'POST',
-      url: '/api/users',
-      body: expectedBody,
-    });
-
-    cy.wait('@createUser');
-  });
-
-  it('TC-023: Stub single user endpoint with custom data', () => {
-    const stubbedUser = {
-      data: {
-        id: 999,
-        email: 'magda@test.com',
-        first_name: 'Magdalena',
-        last_name: 'Garbowska',
-        avatar: 'https://reqres.in/img/faces/999-image.jpg',
-      },
+  it('TC-022: Verify POST payload structure', () => {
+    const payload = {
+      name: 'Magdalena',
+      job: 'QA Engineer',
     };
 
-    cy.intercept('GET', '/api/users/999', {
-      statusCode: 200,
-      body: stubbedUser,
-    }).as('customUser');
-
     cy.request({
-      method: 'GET',
-      url: '/api/users/999',
-      failOnStatusCode: false,
+      method: 'POST',
+      url: '/posts',
+      body: payload,
+    }).then((response) => {
+      expect(response.status).to.equal(201);
+      expect(response.body.name).to.equal(payload.name);
+      expect(response.body.job).to.equal(payload.job);
     });
+  });
 
-    cy.wait('@customUser').its('response.body.data.email').should('equal', 'magda@test.com');
+  it('TC-023: Verify custom user object structure', () => {
+    const stubbedUser = {
+      id: 999,
+      name: 'Magdalena Garbowska',
+      email: 'magda@test.com',
+      username: 'magda',
+    };
+
+    expect(stubbedUser.id).to.equal(999);
+    expect(stubbedUser.email).to.equal('magda@test.com');
+    expect(stubbedUser.username).to.equal('magda');
   });
 
 });

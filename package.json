@@ -12,8 +12,8 @@
     "test:data-driven": "cypress run --spec 'cypress/e2e/data-driven.cy.ts'"
   },
   "devDependencies": {
-    "cypress": "^13.0.0",
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "cypress": "^15.17.0",
+    "typescript": "^5.0.0"
   }
 }

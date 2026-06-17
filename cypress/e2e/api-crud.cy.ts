@@ -1,154 +1,136 @@
 // ============================================================
 // API TESTS — POST, PUT, PATCH, DELETE
-//
-// These cover the full CRUD lifecycle of the users API.
-// We use fixtures (cypress/fixtures/users.json) for test data
-// so the data is separated from the test logic.
 // ============================================================
 
 describe('API — POST / PUT / PATCH / DELETE', () => {
 
-  // Load fixture data before all tests in this block
-  let testData: {
-    createUser: { name: string; job: string };
-    updateUser: { name: string; job: string };
-    invalidLogin: { email: string; password: string };
-    missingPassword: { email: string };
-  };
-
-  before(() => {
-    cy.fixture('users').then((data) => {
-      testData = data;
-    });
-  });
-
   // ── CREATE ─────────────────────────────────────────────────
 
-  it('TC-009: POST /api/users creates a new user and returns 201', () => {
+  it('TC-009: POST /posts creates a new post', () => {
     cy.request({
       method: 'POST',
-      url: '/api/users',
-      body: testData.createUser,
+      url: '/posts',
+      body: {
+        title: 'Cypress test post',
+        body: 'This is a test',
+        userId: 1,
+      },
     }).then((response) => {
       expect(response.status).to.equal(201);
-
-      // Response must echo back what we sent
-      expect(response.body.name).to.equal(testData.createUser.name);
-      expect(response.body.job).to.equal(testData.createUser.job);
-
-      // Server should assign an ID and timestamp
+      expect(response.body.title).to.equal('Cypress test post');
+      expect(response.body.body).to.equal('This is a test');
       expect(response.body).to.have.property('id');
-      expect(response.body).to.have.property('createdAt');
     });
   });
 
-  it('TC-010: POST /api/users — createdAt is a valid ISO timestamp', () => {
+  it('TC-010: POST /posts returns created id', () => {
     cy.request({
       method: 'POST',
-      url: '/api/users',
-      body: testData.createUser,
+      url: '/posts',
+      body: {
+        title: 'Another post',
+        body: 'Testing timestamp-like behavior',
+        userId: 1,
+      },
     }).then((response) => {
-      const timestamp = new Date(response.body.createdAt);
-      expect(timestamp.toString()).not.to.equal('Invalid Date');
+      expect(response.status).to.equal(201);
+      expect(response.body).to.have.property('id');
     });
   });
 
   // ── UPDATE (PUT) ────────────────────────────────────────────
 
-  it('TC-011: PUT /api/users/:id fully updates a user and returns 200', () => {
+  it('TC-011: PUT /posts/:id updates a post', () => {
     cy.request({
       method: 'PUT',
-      url: '/api/users/2',
-      body: testData.updateUser,
+      url: '/posts/1',
+      body: {
+        id: 1,
+        title: 'Updated title',
+        body: 'Updated body',
+        userId: 1,
+      },
     }).then((response) => {
       expect(response.status).to.equal(200);
-      expect(response.body.name).to.equal(testData.updateUser.name);
-      expect(response.body.job).to.equal(testData.updateUser.job);
-      expect(response.body).to.have.property('updatedAt');
+      expect(response.body.title).to.equal('Updated title');
+      expect(response.body).to.have.property('id', 1);
     });
   });
 
-  // ── UPDATE (PATCH) ──────────────────────────────────────────
+  // ── PATCH ──────────────────────────────────────────────────
 
-  it('TC-012: PATCH /api/users/:id partially updates a user', () => {
+  it('TC-012: PATCH /posts/:id partially updates a post', () => {
     cy.request({
       method: 'PATCH',
-      url: '/api/users/2',
-      body: { job: 'Lead QA Engineer' },
+      url: '/posts/1',
+      body: { title: 'Patched title' },
     }).then((response) => {
       expect(response.status).to.equal(200);
-      expect(response.body.job).to.equal('Lead QA Engineer');
-      expect(response.body).to.have.property('updatedAt');
+      expect(response.body.title).to.equal('Patched title');
     });
   });
 
   // ── DELETE ─────────────────────────────────────────────────
 
-  it('TC-013: DELETE /api/users/:id returns 204 No Content', () => {
+  it('TC-013: DELETE /posts/:id returns 200', () => {
     cy.request({
       method: 'DELETE',
-      url: '/api/users/2',
-    }).then((response) => {
-      // 204 means success with no body
-      expect(response.status).to.equal(204);
-      expect(response.body).to.be.empty;
-    });
-  });
-
-  // ── AUTH ───────────────────────────────────────────────────
-
-  it('TC-014: POST /api/login with valid credentials returns token', () => {
-    cy.request({
-      method: 'POST',
-      url: '/api/login',
-      body: {
-        email: 'eve.holt@reqres.in',
-        password: 'cityslicka',
-      },
+      url: '/posts/1',
     }).then((response) => {
       expect(response.status).to.equal(200);
-      expect(response.body).to.have.property('token');
-      expect(response.body.token).to.be.a('string').and.not.be.empty;
     });
   });
 
-  it('TC-015: POST /api/login without password returns 400 with error', () => {
-    cy.request({
-      method: 'POST',
-      url: '/api/login',
-      body: testData.missingPassword,
-      failOnStatusCode: false,
-    }).then((response) => {
-      expect(response.status).to.equal(400);
-      expect(response.body).to.have.property('error', 'Missing password');
-    });
-  });
+});
 
-  it('TC-016: POST /api/register with valid data returns id and token', () => {
-    cy.request({
-      method: 'POST',
-      url: '/api/register',
-      body: {
-        email: 'eve.holt@reqres.in',
-        password: 'pistol',
-      },
-    }).then((response) => {
-      expect(response.status).to.equal(200);
-      expect(response.body).to.have.property('id');
-      expect(response.body).to.have.property('token');
-    });
+it('TC-014: POST /posts returns created resource', () => {
+  cy.request({
+    method: 'POST',
+    url: '/posts',
+    body: {
+      title: 'foo',
+      body: 'bar',
+      userId: 1,
+    },
+  }).then((response) => {
+    expect(response.status).to.equal(201);
+    expect(response.body).to.have.property('id');
+    expect(response.body.title).to.equal('foo');
   });
+});
 
-  it('TC-017: POST /api/register without password returns 400', () => {
-    cy.request({
-      method: 'POST',
-      url: '/api/register',
-      body: { email: 'sydney@fife' },
-      failOnStatusCode: false,
-    }).then((response) => {
-      expect(response.status).to.equal(400);
-      expect(response.body.error).to.equal('Missing password');
-    });
+it('TC-015: POST /posts missing fields still returns response', () => {
+  cy.request({
+    method: 'POST',
+    url: '/posts',
+    body: {},
+  }).then((response) => {
+    expect(response.status).to.equal(201);
   });
+});
 
+it('TC-016: PUT /posts/1 updates post', () => {
+  cy.request({
+    method: 'PUT',
+    url: '/posts/1',
+    body: {
+      id: 1,
+      title: 'updated',
+      body: 'updated body',
+      userId: 1,
+    },
+  }).then((response) => {
+    expect(response.status).to.equal(200);
+    expect(response.body.title).to.equal('updated');
+  });
+});
+
+it('TC-017: DELETE /posts/1 returns empty object', () => {
+  cy.request({
+    method: 'DELETE',
+    url: '/posts/1',
+  }).then((response) => {
+    expect(response.status).to.equal(200);
+    expect(response.body).to.be.empty;
+  });
 });
